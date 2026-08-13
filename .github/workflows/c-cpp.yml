@@ -15,17 +15,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: List available Windows SDKs (debugging)
+      - name: Detect installed Windows SDK version
+        id: detect_sdk
         run: |
-          Write-Host "Installed Windows SDK versions (Include):"
-          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Include" | ForEach-Object { $_.Name }
+          # Find the highest version folder under Include
+          $sdkPath = "C:\Program Files (x86)\Windows Kits\10\Include"
+          $versions = Get-ChildItem -Path $sdkPath -Directory | Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } | ForEach-Object { [version]$_.Name } | Sort-Object -Descending
+          $latest = $versions[0].ToString()
+          Write-Host "Latest SDK version: $latest"
+          echo "SDK_VERSION=$latest" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Update .vcxproj to use detected SDK
+        run: |
+          $vcxproj = "AddressDumper\AddressDumper.vcxproj"
+          $xml = [xml](Get-Content $vcxproj)
+          # Find the PropertyGroup that contains WindowsTargetPlatformVersion
+          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+          $ns.AddNamespace("ms", "http://schemas.microsoft.com/developer/msbuild/2003")
+          $nodes = $xml.SelectNodes("//ms:PropertyGroup", $ns)
+          foreach ($node in $nodes) {
+            $child = $node.SelectSingleNode("ms:WindowsTargetPlatformVersion", $ns)
+            if ($child -ne $null) {
+              $child.InnerText = $env:SDK_VERSION
+              Write-Host "Updated WindowsTargetPlatformVersion to $env:SDK_VERSION"
+            }
+          }
+          $xml.Save($vcxproj)
+        shell: pwsh
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
       - name: Build solution (x86 Release)
-        run: |
-          msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /p:WindowsTargetPlatformVersion=10.0.20348.0 /verbosity:normal
+        run: msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /verbosity:normal
 
       - name: Upload Release folder
         uses: actions/upload-artifact@v4
