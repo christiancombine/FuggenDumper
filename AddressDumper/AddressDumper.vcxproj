@@ -148,10 +148,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AddressDumper.cpp" />
-    <ClCompile Include="eyecrawl.cpp" />
+    <ClCompile Include="eyestep.cpp" />
+    <ClCompile Include="eyestep_utility.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="eyecrawl.h" />
+    <ClCompile Include="eyestep.h" />
+    <ClCompile Include="eyestep_utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
