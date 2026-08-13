@@ -2,24 +2,8 @@
 #include <string>
 #include <iostream>
 
-//CREDITS TO STATIC FOR THE EYECRAWL API
-//IT CAN BE FOUND HERE
-//OPEN SOURCE AT
-//https://github.com/thedoomed/EyeCrawl/
+// discord.gg/qdl
 #include "eyestep_utility.h"
-
-
-std::vector<std::string> LoggedCFunctions;
-
-void LogCFunction(std::string FunctionName, unsigned int Function) {
-	std::vector<std::string>::iterator it = std::find(LoggedCFunctions.begin(), LoggedCFunctions.end(), FunctionName);
-	if (it == LoggedCFunctions.cend()) {
-		std::cout << "[" << FunctionName << "] - 0x" << EyeCrawl::to_str(EyeCrawl::non_aslr(Function)) << " - __" << EyeCrawl::util::calltype(Function) << "\n";
-		LoggedCFunctions.push_back(FunctionName);
-	}
-}
-
-
 
 
 
@@ -28,24 +12,36 @@ int main()
 	SetConsoleTitleA("Fuggen Dumper | Edited By Combine");
     std::cout << "Finding Roblox... ";
 
-	HWND hWnd;
-	HANDLE handle;
-	unsigned long id = 0;
-	hWnd = FindWindowA(NULL, "Roblox");
-	GetWindowThreadProcessId(hWnd, &id);
+HWND hWnd = FindWindowA(NULL, "Roblox");
+if (!hWnd) return 1;
 
-	handle = OpenProcess(PROCESS_ALL_ACCESS, false, id);
-	if (handle == INVALID_HANDLE_VALUE) {
-		std::cout << "Failure!\n\n";
-		std::cout << "Open Roblox!\n";
-		system("PAUSE");
-	}
+DWORD id;
+GetWindowThreadProcessId(hWnd, &id);
 
-	//else open the process as a handle
-	std::cout << "Success!\n";
-	//set eyecrawls target process to this handle
-	EyeCrawl::open(handle);
+HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+if (!handle) return 1;
 
+EyeStep::external_mode = true;
+EyeStep::current_proc = handle;
+
+MODULEENTRY32 me = { sizeof(me) };
+HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, id);
+if (hSnap != INVALID_HANDLE_VALUE)
+{
+    if (Module32First(hSnap, &me))
+    {
+        do
+        {
+            if (_stricmp(me.szModule, "RobloxPlayerBeta.exe") == 0)
+            {
+                EyeStep::base_module = me.modBaseAddr;
+                EyeStep::base_module_size = me.modBaseSize;
+                break;
+            }
+        } while (Module32Next(hSnap, &me));
+    }
+    CloseHandle(hSnap);
+}
 
 	//begin scan
 
@@ -55,7 +51,8 @@ int main()
 	printf("Lua_Print: 0x%08X.\n", EyeStep::scanner::scan_xrefs("Video Recording Started", 1)[1]);
     printf("Lua_GetField: 0x%08X.\n", EyeStep::scanner::scan_xrefs("tostring", 1)[1]); // Good Luck on this one 
 	printf("LuaU_Load: 0x%08X.\n", EyeStep::scanner::scan_xrefs(": Bytecode Version Mismatch", 1)[1]);
-    printf("yourfunc: 0x%08X.\n", EyeStep::scanner::scan("Invalid", true)); // Good Luck on this one 
+	// ok no need for ts but its AOB scanning so u can add it
+  //  printf("yourfunc: 0x%08X.\n", EyeStep::scanner::scan("Invalid", true)); // Good Luck on this one 
 	std::cout << "Success!\n";
 
 	std::cout << "Credits To Static For His Beautiful EyeCrawl API!\n";
