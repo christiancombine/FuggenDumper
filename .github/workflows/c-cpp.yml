@@ -1,0 +1,45 @@
+name: Build AddressDumper (x86 Release) with VS 2017 toolset
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Detect the highest installed Windows SDK
+      - name: Detect Windows SDK version
+        id: sdk
+        run: |
+          $sdkPath = "C:\Program Files (x86)\Windows Kits\10\Include"
+          $versions = Get-ChildItem -Path $sdkPath -Directory | Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } | ForEach-Object { [version]$_.Name } | Sort-Object -Descending
+          $latest = $versions[0].ToString()
+          Write-Host "Using SDK version: $latest"
+          echo "SDK_VERSION=$latest" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build solution (x86 Release) with v141 toolset
+        run: |
+          msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141 /p:WindowsTargetPlatformVersion=${{ env.SDK_VERSION }} /verbosity:normal
+
+      - name: Upload Release folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: AddressDumper-x86-Release
+          path: |
+            **/Release/
+            **/x86/Release/
+            **/bin/Release/
+            **/bin/x86/Release/
+          if-no-files-found: error
