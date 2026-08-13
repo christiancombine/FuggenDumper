@@ -15,25 +15,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install Chocolatey (if not already present) and the required SDK
-      - name: Install Chocolatey and Windows SDK
+      - name: List available Windows SDKs (debugging)
         run: |
-          # Enable TLS 1.2
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-          # Install Chocolatey
-          if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
-            iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-          }
-          # Install the specific Windows SDK version
-          choco install windows-sdk-10.0.17134.0 -y --limit-output
-          # (Optional) Install the C++ compiler if needed (normally already present)
-          # choco install visualstudio2019buildtools -y --limit-output
+          Write-Host "Installed Windows SDK versions (Include):"
+          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Include" | ForEach-Object { $_.Name }
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
       - name: Build solution (x86 Release)
-        run: msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /verbosity:normal
+        run: |
+          msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /p:WindowsTargetPlatformVersion=10.0.20348.0 /verbosity:normal
 
       - name: Upload Release folder
         uses: actions/upload-artifact@v4
