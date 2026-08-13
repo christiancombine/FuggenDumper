@@ -1,4 +1,4 @@
-name: Build AddressDumper (x86 Release)
+name: Build AddressDumper (x86 Release, C++17)
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
 
       - name: Build solution (x86 Release)
         run: |
-          msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0.26100.0 /verbosity:normal
+          msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /p:LanguageStandard=stdcpp17 /verbosity:normal
 
       - name: Upload Release folder
         uses: actions/upload-artifact@v4
