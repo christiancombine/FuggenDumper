@@ -1,0 +1,33 @@
+name: Build AddressDumper (x86 Release)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:   # allows manual trigger
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build solution (x86 Release)
+        run: msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /verbosity:normal
+
+      - name: Upload Release folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: AddressDumper-x86-Release
+          path: |
+            **/Release/
+            **/x86/Release/
+            **/bin/Release/
+            **/bin/x86/Release/
+          if-no-files-found: error
