@@ -25,7 +25,7 @@ void LogCFunction(std::string FunctionName, unsigned int Function) {
 
 int main()
 {
-	SetConsoleTitleA("Address Dumper | By Ringarang | Credits To Static");
+	SetConsoleTitleA("Fuggen Dumper | Edited By Combine");
     std::cout << "Finding Roblox... ";
 
 	HWND hWnd;

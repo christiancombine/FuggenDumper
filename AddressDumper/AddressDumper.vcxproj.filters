@@ -18,12 +18,18 @@
     <ClCompile Include="AddressDumper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="eyecrawl.cpp">
+    <ClCompile Include="eyestep.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="eyestep_utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="eyecrawl.h">
+    <ClInclude Include="eyestep.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+        <ClInclude Include="eyestep_utility.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
