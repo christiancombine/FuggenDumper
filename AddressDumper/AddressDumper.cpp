@@ -1,6 +1,9 @@
 ﻿#include <Windows.h>
 #include <string>
 #include <iostream>
+#pragma comment(lib, "psapi.lib")
+#pragma comment(lib, "kernel32.lib")
+#pragma comment(lib, "user32.lib")
 
 //CREDITS TO STATIC FOR THE EYECRAWL API
 // christiancombine.github.io won noob
