@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:   # allows manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,6 +14,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      # Install Chocolatey (if not already present) and the required SDK
+      - name: Install Chocolatey and Windows SDK
+        run: |
+          # Enable TLS 1.2
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+          # Install Chocolatey
+          if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+            iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          }
+          # Install the specific Windows SDK version
+          choco install windows-sdk-10.0.17134.0 -y --limit-output
+          # (Optional) Install the C++ compiler if needed (normally already present)
+          # choco install visualstudio2019buildtools -y --limit-output
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
