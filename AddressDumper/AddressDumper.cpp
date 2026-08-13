@@ -54,7 +54,8 @@ int main()
 
 	printf("Lua_Print: 0x%08X.\n", EyeStep::scanner::scan_xrefs("Video Recording Started", 1)[1]);
     printf("Lua_GetField: 0x%08X.\n", EyeStep::scanner::scan_xrefs("tostring", 1)[1]); // Good Luck on this one 
-
+	printf("LuaU_Load: 0x%08X.\n", EyeStep::scanner::scan_xrefs(": Bytecode Version Mismatch", 1)[1]);
+    printf("yourfunc: 0x%08X.\n", EyeStep::scanner::scan("Invalid", true)); // Good Luck on this one 
 	std::cout << "Success!\n";
 
 	std::cout << "Credits To Static For His Beautiful EyeCrawl API!\n";
