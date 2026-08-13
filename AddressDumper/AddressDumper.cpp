@@ -2,8 +2,10 @@
 #include <string>
 #include <iostream>
 
-// discord.gg/qdl
+//CREDITS TO STATIC FOR THE EYECRAWL API
+// christiancombine.github.io won noob
 #include "eyestep_utility.h"
+
 
 
 
@@ -13,35 +15,37 @@ int main()
     std::cout << "Finding Roblox... ";
 
 HWND hWnd = FindWindowA(NULL, "Roblox");
-if (!hWnd) return 1;
 
-DWORD id;
+if (!hWnd)
+{
+    std::cout << "Roblox window not found!\n";
+    system("PAUSE");
+    return;
+}
+
+DWORD id = 0;
 GetWindowThreadProcessId(hWnd, &id);
 
-HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
-if (!handle) return 1;
-
-EyeStep::external_mode = true;
-EyeStep::current_proc = handle;
-
-MODULEENTRY32 me = { sizeof(me) };
-HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, id);
-if (hSnap != INVALID_HANDLE_VALUE)
+if (!id)
 {
-    if (Module32First(hSnap, &me))
-    {
-        do
-        {
-            if (_stricmp(me.szModule, "RobloxPlayerBeta.exe") == 0)
-            {
-                EyeStep::base_module = me.modBaseAddr;
-                EyeStep::base_module_size = me.modBaseSize;
-                break;
-            }
-        } while (Module32Next(hSnap, &me));
-    }
-    CloseHandle(hSnap);
+    std::cout << "Failed to get Roblox PID!\n";
+    system("PAUSE");
+    return;
 }
+
+HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+
+if (!handle)
+{
+    std::cout << "Failed to open Roblox process!\n";
+    system("PAUSE");
+    return;
+}
+
+std::cout << "Success!\n";
+
+EyeStep::open(handle);
+
 
 	//begin scan
 
@@ -55,15 +59,9 @@ if (hSnap != INVALID_HANDLE_VALUE)
   //  printf("yourfunc: 0x%08X.\n", EyeStep::scanner::scan("Invalid", true)); // Good Luck on this one 
 	std::cout << "Success!\n";
 
-	std::cout << "Credits To Static For His Beautiful EyeCrawl API!\n";
-	std::cout << "https://github.com/thedoomed/EyeCrawl/ \n";
 
 	system("PAUSE");
 	return 0;
 
-
-	//note: I hope this example served you well, and will help you in creating fully-fledged applications
-	//such as dumpers as statics beautiful eyecrawl api can be used for A LOT more than just this
-	//Keep in mind this is an example and please feel free to expand it and make it dump more offsets!
 }
 
