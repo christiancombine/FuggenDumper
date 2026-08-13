@@ -1,4 +1,4 @@
-name: Build AddressDumper (x86 Release)
+name: Build AddressDumper (x86 Release) with VS 2017 toolset
 
 on:
   push:
@@ -15,40 +15,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Detect installed Windows SDK version
-        id: detect_sdk
+      # Detect the highest installed Windows SDK
+      - name: Detect Windows SDK version
+        id: sdk
         run: |
-          # Find the highest version folder under Include
           $sdkPath = "C:\Program Files (x86)\Windows Kits\10\Include"
           $versions = Get-ChildItem -Path $sdkPath -Directory | Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } | ForEach-Object { [version]$_.Name } | Sort-Object -Descending
           $latest = $versions[0].ToString()
-          Write-Host "Latest SDK version: $latest"
+          Write-Host "Using SDK version: $latest"
           echo "SDK_VERSION=$latest" >> $env:GITHUB_ENV
-        shell: pwsh
-
-      - name: Update .vcxproj to use detected SDK
-        run: |
-          $vcxproj = "AddressDumper\AddressDumper.vcxproj"
-          $xml = [xml](Get-Content $vcxproj)
-          # Find the PropertyGroup that contains WindowsTargetPlatformVersion
-          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
-          $ns.AddNamespace("ms", "http://schemas.microsoft.com/developer/msbuild/2003")
-          $nodes = $xml.SelectNodes("//ms:PropertyGroup", $ns)
-          foreach ($node in $nodes) {
-            $child = $node.SelectSingleNode("ms:WindowsTargetPlatformVersion", $ns)
-            if ($child -ne $null) {
-              $child.InnerText = $env:SDK_VERSION
-              Write-Host "Updated WindowsTargetPlatformVersion to $env:SDK_VERSION"
-            }
-          }
-          $xml.Save($vcxproj)
         shell: pwsh
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
-      - name: Build solution (x86 Release)
-        run: msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /verbosity:normal
+      - name: Build solution (x86 Release) with v141 toolset
+        run: |
+          msbuild AddressDumper.sln /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141 /p:WindowsTargetPlatformVersion=${{ env.SDK_VERSION }} /verbosity:normal
 
       - name: Upload Release folder
         uses: actions/upload-artifact@v4
